@@ -17,7 +17,9 @@
  *   npx tsx scripts/fill-images.ts --dry-run   # report only
  *   npx tsx scripts/fill-images.ts --apply     # write to DB
  */
-import { localDb as db } from "../src/lib/db/local";
+import { openLocalDb } from "../src/lib/db/local";
+
+const db = openLocalDb();
 import { exercises } from "../src/lib/db/schema";
 import { eq } from "drizzle-orm";
 

@@ -8,7 +8,9 @@
  * Images are CC BY-SA 4.0 (authors vary, mostly Everkinetic / wger contributors).
  * Re-runs simply refresh the stored URL for each match.
  */
-import { localDb as db } from "../src/lib/db/local";
+import { openLocalDb } from "../src/lib/db/local";
+
+const db = openLocalDb();
 import { exercises } from "../src/lib/db/schema";
 import { eq } from "drizzle-orm";
 

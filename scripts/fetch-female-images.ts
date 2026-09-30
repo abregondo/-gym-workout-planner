@@ -11,7 +11,9 @@
  * marcmayol.com (slow/unreachable here) to the identical assets on
  * marcmayol.github.io (verified HTTP 200).
  */
-import { localDb as db } from "../src/lib/db/local";
+import { openLocalDb } from "../src/lib/db/local";
+
+const db = openLocalDb();
 import { exercises } from "../src/lib/db/schema";
 import { eq } from "drizzle-orm";
 
