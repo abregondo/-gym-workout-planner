@@ -86,7 +86,10 @@ export default function PlannerPage() {
   const [savingDay, setSavingDay] = useState(false);
 
   useEffect(() => {
-    seedAllExercises().then(() => getExercises()).then(setExerciseOptions);
+    seedAllExercises()
+      .then(() => getExercises())
+      .then(setExerciseOptions)
+      .catch((e) => console.error("Failed to load exercises:", e));
   }, []);
 
   useEffect(() => {

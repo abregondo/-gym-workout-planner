@@ -262,6 +262,11 @@ export async function seedExercises() {
     const byTargetId = new Map<string, string>(); // new exercise id -> existing row id
 
     // Pass 1: match existing rows to canonical entries (IDs preserved).
+    // UPDATEs are issued only for rows that actually differ, so a steady-state
+    // call is a single SELECT — critical on Turso, where every statement is an
+    // HTTPS round-trip (an unconditional 182-row update per page load times out
+    // server actions and burns write quota).
+    let updated = 0;
     for (const row of existing) {
       const targetName =
         SEED_EXERCISES.find((e) => slug(e.name) === row.id)?.name ??
@@ -274,21 +279,31 @@ export async function seedExercises() {
       if (byTargetId.has(targetId)) continue;
       byTargetId.set(targetId, row.id);
       const imgs = IMAGE_URLS[target.name];
-      await db
-        .update(exercises)
-        .set({
-          name: target.name,
-          category: target.category,
-          muscleGroup: target.muscleGroup,
-          equipment: target.equipment,
-          gender: target.gender,
-          difficulty: target.difficulty,
-          instructions: target.instructions,
-          // Backfill image URLs only — never clobber existing ones.
-          imageUrl: row.imageUrl ?? imgs?.imageUrl ?? null,
-          imageUrlFemale: row.imageUrlFemale ?? imgs?.imageUrlFemale ?? null,
-        })
-        .where(eq(exercises.id, row.id));
+      const patch = {
+        name: target.name,
+        category: target.category,
+        muscleGroup: target.muscleGroup,
+        equipment: target.equipment,
+        gender: target.gender,
+        difficulty: target.difficulty,
+        instructions: target.instructions,
+        // Backfill image URLs only — never clobber existing ones.
+        imageUrl: row.imageUrl ?? imgs?.imageUrl ?? null,
+        imageUrlFemale: row.imageUrlFemale ?? imgs?.imageUrlFemale ?? null,
+      };
+      const differs =
+        row.name !== patch.name ||
+        row.category !== patch.category ||
+        row.muscleGroup !== patch.muscleGroup ||
+        row.equipment !== patch.equipment ||
+        row.gender !== patch.gender ||
+        row.difficulty !== patch.difficulty ||
+        row.instructions !== patch.instructions ||
+        row.imageUrl !== patch.imageUrl ||
+        row.imageUrlFemale !== patch.imageUrlFemale;
+      if (!differs) continue;
+      await db.update(exercises).set(patch).where(eq(exercises.id, row.id));
+      updated++;
     }
 
     // Pass 2: insert canonical entries that have no existing row.
@@ -313,6 +328,7 @@ export async function seedExercises() {
     }
 
     if (inserted > 0) console.log(`Seeded ${inserted} exercises`);
+    if (updated > 0) console.log(`Updated ${updated} exercises`);
   } catch (err) {
     console.error("Seed failed:", err);
   }

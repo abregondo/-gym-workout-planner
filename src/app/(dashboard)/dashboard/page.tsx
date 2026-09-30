@@ -53,7 +53,7 @@ export default function DashboardPage() {
             setTodayTemplate(t);
           }
         }
-      );
+      ).catch((e) => console.error("Failed to load dashboard data:", e));
     }
   }, [user?.id]);
 

@@ -90,7 +90,10 @@ export default function ExercisesPage() {
   const [selectedExercise, setSelectedExercise] = useState<Exercise | null>(null);
 
   useEffect(() => {
-    seedAllExercises().then(() => getExercises()).then(setAllExercises);
+    seedAllExercises()
+      .then(() => getExercises())
+      .then(setAllExercises)
+      .catch((e) => console.error("Failed to load exercises:", e));
   }, []);
 
   useEffect(() => {

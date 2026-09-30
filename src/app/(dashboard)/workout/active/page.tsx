@@ -56,13 +56,16 @@ function ActiveWorkoutContent() {
   const [exMeta, setExMeta] = useState<Record<string, ExMeta>>({});
 
   useEffect(() => {
-    seedAllExercises().then(() => getExercises()).then((rows) => {
-      const map: Record<string, ExMeta> = {};
-      for (const r of rows) {
-        map[r.name] = { id: r.id, name: r.name, imageUrl: r.imageUrl, category: r.category, muscleGroup: r.muscleGroup };
-      }
-      setExMeta(map);
-    });
+    seedAllExercises()
+      .then(() => getExercises())
+      .then((rows) => {
+        const map: Record<string, ExMeta> = {};
+        for (const r of rows) {
+          map[r.name] = { id: r.id, name: r.name, imageUrl: r.imageUrl, category: r.category, muscleGroup: r.muscleGroup };
+        }
+        setExMeta(map);
+      })
+      .catch((e) => console.error("Failed to load exercises:", e));
   }, []);
 
   useEffect(() => {
