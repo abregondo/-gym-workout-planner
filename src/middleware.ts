@@ -1,7 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
 
 export function middleware(request: NextRequest) {
-  const sessionCookie = request.cookies.get("better-auth.session_token");
+  // Better Auth prefixes the cookie name with __Secure- on HTTPS (production)
+  // and uses the plain name on HTTP (local dev) — check all variants.
+  const sessionCookie =
+    request.cookies.get("__Secure-better-auth.session_token") ??
+    request.cookies.get("__Host-better-auth.session_token") ??
+    request.cookies.get("better-auth.session_token");
 
   const isAuthPage =
     request.nextUrl.pathname === "/login" ||
