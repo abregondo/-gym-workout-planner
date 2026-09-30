@@ -29,7 +29,16 @@ export default function LoginPage() {
       });
 
       if (!res.ok) {
-        setError("Invalid email or password");
+        let message = "Invalid email or password";
+        try {
+          const data = await res.json();
+          if (typeof data?.message === "string" && data.message.length > 0) {
+            message = data.message;
+          }
+        } catch {
+          // keep the default message
+        }
+        setError(message);
         setLoading(false);
         return;
       }
